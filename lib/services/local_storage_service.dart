@@ -2,11 +2,15 @@ import 'package:flutter/foundation.dart';
 import 'package:get_storage/get_storage.dart';
 import 'dart:convert';
 import '../models/note.dart';
-import 'firebase_service.dart'; // Assuming Firebase related methods are in this service
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+
+
+final _firestore = FirebaseFirestore.instance;
+
 
 class LocalStorageService {
   final GetStorage _storage = GetStorage();
-
   Future<List<Note>> loadNotes() async {
     try {
       if (kIsWeb || !_storage.hasData('notes')) {
