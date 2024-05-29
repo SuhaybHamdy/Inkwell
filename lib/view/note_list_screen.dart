@@ -1,121 +1,124 @@
+// lib/ui/screens/note_list_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/note_controller.dart';
-import '../models/note.dart';
+import 'package:inkwell/controllers/note_controller.dart';
+import 'package:inkwell/models/note.dart';
+import 'package:inkwell/routes/app_routes.dart';
+import 'package:inkwell/ui/widgets/note_card.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
-class NoteEditScreen extends GetResponsiveView<NoteController> {
-  final Note? note;
+class NoteListScreen extends StatelessWidget {
+  final NoteController controller = Get.find<NoteController>();
 
-  NoteEditScreen({this.note});
-
-  @override
-  Widget? desktop() {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(note == null ? 'Create Note' : 'Edit Note'),
-      ),
-      body: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Container(
-              color: Colors.grey[200],
-              child: Center(child: Text('Sidebar or additional features here')),
-            ),
-          ),
-          Expanded(
-            flex: 5,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: NoteEditForm(note: note),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  @override
-  Widget? tablet() {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(note == null ? 'Create Note' : 'Edit Note'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Expanded(
-              child: NoteEditForm(note: note),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget? phone() {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(note == null ? 'Create Note' : 'Edit Note'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: NoteEditForm(note: note),
-      ),
-    );
-  }
-}
-
-class NoteEditForm extends StatelessWidget {
-  final Note? note;
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _contentController = TextEditingController();
-
-  NoteEditForm({Key? key, this.note}) : super(key: key) {
-    if (note != null) {
-      _titleController.text = note!.title;
-      _contentController.text = note!.content;
-    }
-  }
+  NoteListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final NoteController controller = Get.find<NoteController>();
+    var notes = controller.notes;
+    print('this is a note list length: ${notes.length}');
+    return GetBuilder<NoteController>(
+      builder: (controller) {
+        return Scaffold(
+            floatingActionButton: FloatingActionButton(
+              onPressed: () => Get.toNamed(AppRoutes.noteDetail),
+              child: const Icon(Icons.note_add),
+            ),
+            body: Column(
+              children: [
+                // Container(
+                //     height: 60,width: Get.width,
+                //     alignment: Alignment.bottomCenter,
+                //     margin: EdgeInsets.all(16),
+                //     child: Row(
+                //
+                //       children: [
+                //          Row(
+                //            children: [
+                //            //   IconButton(
+                //            //   icon: Icon(Icons.arrow_back_ios),
+                //            //   onPressed: () => Get.back(),
+                //            // ),
+                //              Text('Inkwell',style: Get.theme.textTheme.headlineSmall,),
+                //            ],
+                //          ),
+                //     Spacer(),
+                //     IconButton(
+                //             icon: Icon(Icons.add),
+                //             onPressed: () => Get.toNamed(AppRoutes.noteDetail),
+                //           ),
+                //       ],
+                //     )),
+                AppBar(
+                  title: const Text('Inkwell'),
+                  actions: [
+                    IconButton(
+                      icon: Icon(Icons.add),
+                      onPressed: () {
+                        controller.titleController.text = '';
+                        controller.quillController.clear();
+                        Get.toNamed(AppRoutes.noteDetail);
 
-    return Form(
-      child: Column(
-        children: [
-          TextFormField(
-            controller: _titleController,
-            decoration: InputDecoration(labelText: 'Title'),
-          ),
-          SizedBox(height: 16.0),
-          TextFormField(
-            controller: _contentController,
-            decoration: InputDecoration(labelText: 'Content'),
-            maxLines: 10,
-          ),
-          SizedBox(height: 16.0),
-          ElevatedButton(
-            onPressed: () {
-              // final newNote = Note(
-              //   id: note?.id ?? UniqueKey().toString(),
-              //   title: _titleController.text,
-              //   content: _contentController.text,
-              // );
-              // if (note == null) {
-              //   controller.saveNote(newNote);
-              // } else {
-              //   controller.editNote(newNote);
-              // }
-              // Get.back();
-            },
-            child: Text(note == null ? 'Create' : 'Update'),
-          ),
-        ],
-      ),
+
+                      },
+                    ),
+                  ],
+                ),
+
+
+                notes.isEmpty
+                    ? const CircularProgressIndicator()
+                    : Container(
+                  height: Get.height-100,width: Get.width,
+                        child: MasonryGridView.builder(
+                        gridDelegate:
+                            const SliverSimpleGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                        ),
+                        itemCount: notes.length,
+                        itemBuilder: (context, index) {
+                          final note = notes[index];
+                          return NoteCard(
+                            note: note,
+                            onTap: () {
+                              controller.titleController.text='';
+                              controller.quillController.clear();
+                              Get.toNamed(AppRoutes.noteDetail,
+                                  arguments: note.id);
+                              controller.initializeNote();
+                              controller.update();
+                            },
+                            onDelete: (note) async {
+                              print('deleting call');
+                              await controller.deleteNote(note);
+                            },
+                          );
+                        },
+                      )
+
+                        // GridView.builder(
+                        //               itemCount: notes.length,
+                        //               itemBuilder: (context, index) {
+                        //                 final note = notes[index];
+                        //                 return NoteCard(
+                        //                   note: note,
+                        //                   onTap: () {
+                        //                     Get.toNamed(AppRoutes.noteDetail,
+                        //                         arguments: note.id);
+                        //                     controller.initializeNote();
+                        //                     controller.update();
+                        //                   },
+                        //                   onDelete: (note) async {
+                        //                     print('deleting call');
+                        //                     await controller.deleteNote(note);
+                        //                   },
+                        //                 );
+                        //               }, gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
+                        //             ),
+                        ),
+              ],
+            ));
+      },
     );
   }
 }
