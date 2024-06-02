@@ -2,11 +2,11 @@ import 'package:flutter_quill/flutter_quill.dart';
 
 class Note {
   String? id;
-  final String title;
+   String title;
 
-  final String content;
-  final List<String>? categories;
-  final List<String>? tags;
+   String content;
+   List<String>? categories;
+   List<String>? tags;
 
   Note({
     this.id,

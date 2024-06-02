@@ -83,13 +83,13 @@ class NoteEditScreen extends GetResponsiveView<NoteController> {
                   content: json,
                 );
 
-                print('this is the value of the delta : ${newNote.content}');
-                if (controller.note == null) {
-                await   controller.saveNote(newNote);
+                // print('this is the value of the delta : ${newNote.content}');
+                if (controller.currentNote != null) {
+                await   controller.saveNote();
                 } else {
-                  controller.editNote(newNote);
+                  controller.editNote();
                 }
-                controller.note=Note(title: '', content: '');
+                controller.currentNote=Note(title: '', content: '');
                 controller.titleController.text='';
                 controller.quillController.clear();
                 controller.update();

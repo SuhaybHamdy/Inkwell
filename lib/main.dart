@@ -1,12 +1,16 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get/get.dart';
-import 'package:inkwell/view/note_list_screen.dart';
+import 'package:inkwell/controllers/auth_controller.dart';
+import 'package:inkwell/local/local.dart';
 import 'routes/app_routes.dart';
 import 'routes/app_pages.dart';
 
-import 'controllers/note_controller.dart';
 import 'firebase_options.dart';
+import 'package:inkwell/theme/theme.dart';
+import 'package:inkwell/theme/util.dart';
+
 // routes/app_pages.dart
 
 Future<void> main() async {
@@ -24,21 +28,38 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    final brightness = View.of(context).platformDispatcher.platformBrightness;
+    //
+    // // Retrieves the default theme for the platform
+    // TextTheme textTheme = Theme.of(context).textTheme;
+    //
+    // // Use with Google Fonts package to use downloadable fonts
+    TextTheme textTheme = createTextTheme(context, "Allerta", "Akaya Kanadaka");
+    //
+    MaterialTheme theme = MaterialTheme(textTheme);
 
-    Get.lazyPut(()=>NoteController());
+    Get.lazyPut(()=>AuthController());
+return GetBuilder<AuthController>(
+  builder: (controller) {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: Color(0xffF4E1A0),
-            background: Color(0xff00000),
-            brightness: Brightness.dark),
-        useMaterial3: true,
-      ),
-      // home: NoteListScreen(),
-      initialRoute: AppRoutes.noteList,
+      theme: brightness == Brightness.light ? theme.light() : theme.dark(),
+      translations: AppTranslations(),
+      localizationsDelegates: const [
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+        DefaultCupertinoLocalizations.delegate
+      ],
+      locale: Locale(controller.getLangCode, ''),
+      // fallbackLocale: Locale(LangCode.en.name, ''),
+
+      // useMaterial3: true,
+      // ),
+      // home: LoginScreen(),
+      initialRoute: AppRoutes.splash,
       getPages: AppPages.pages,
     );
-  }
+  },
+) ; }
 }

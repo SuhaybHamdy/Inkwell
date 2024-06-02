@@ -4,38 +4,57 @@ import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:flutter_quill/quill_delta.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:inkwell/models/note.dart';
+
+import '../routes/app_routes.dart';
 import '../services/local_storage_service.dart';
-import '../models/note.dart';
 
 class NoteController extends GetxController {
-  final RxList<Note> notes = RxList<Note>([]); // List of notes in memory
-  final LocalStorageService _localStorageService =
-      LocalStorageService(); // Instance of the service
+  final RxList<Note> notes = RxList<Note>([]);
+  final NotesService _notesService = NotesService();
 
-  Note? note;
-  TextEditingController titleController = TextEditingController();
+  Note? currentNote;
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController searchController = TextEditingController();
   QuillController quillController = QuillController.basic();
-  ScrollController scrollController = ScrollController();
+  final ScrollController scrollController = ScrollController();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final GetStorage _box = GetStorage();
 
+  RxBool isAuth = RxBool(true);
   bool isShowToolbar = true;
+  var filteredNotes = <Note>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-    _loadNotes(); // Load notes on app initialization
-    initializeNote();
+    searchController.addListener(_onSearchChanged);
+    initAuth();
+  }
+
+  void _onSearchChanged() {
+    searchNotes(searchController.text);
+  }
+
+  void initAuth() {
+    if (isAuth.isTrue) {
+      _loadNotes();
+      initializeNote();
+    } else {
+      Get.toNamed(AppRoutes.login);
+    }
   }
 
   Future<void> initializeNote() async {
     final arguments = Get.arguments;
-
-    Note? noteValue;
     if (arguments != null && arguments is String) {
-      noteValue = _findNoteById(arguments);
+      currentNote = _findNoteById(arguments);
     }
 
-    if (noteValue != null) {
-      await _initializeQuillControllerWithNoteContent(noteValue);
+    if (currentNote != null) {
+      await _initializeQuillControllerWithNoteContent(currentNote!);
     } else {
       _initializeBasicQuillController();
     }
@@ -44,19 +63,13 @@ class NoteController extends GetxController {
   }
 
   Note? _findNoteById(String id) {
-    try {
-      return notes.firstWhereOrNull((element) => element.id == id);
-    } catch (e) {
-      return null;
-    }
+    return notes.firstWhereOrNull((note) => note.id == id);
   }
 
-  Future<void> _initializeQuillControllerWithNoteContent(
-      Note? noteValue) async {
+  Future<void> _initializeQuillControllerWithNoteContent(Note note) async {
     try {
-      titleController.text = noteValue!.title;
-
-      final deltaJson = jsonDecode(noteValue.content) as List<dynamic>;
+      titleController.text = note.title;
+      final deltaJson = jsonDecode(note.content) as List<dynamic>;
       final delta = Delta.fromJson(deltaJson);
 
       quillController = QuillController(
@@ -68,20 +81,16 @@ class NoteController extends GetxController {
     }
   }
 
-  String extractPlainTextFromNoteContent(Note noteValue) {
+  String extractPlainTextFromNoteContent(Note note) {
     try {
-      final deltaJson = jsonDecode(noteValue.content) as List<dynamic>;
+      final deltaJson = jsonDecode(note.content) as List<dynamic>;
       final delta = Delta.fromJson(deltaJson);
       var controllerQuill = QuillController(
         document: Document.fromDelta(delta),
         selection: const TextSelection.collapsed(offset: 0),
       );
-      // Convert Delta to plain text
-      final plainText = controllerQuill.document.toPlainText();
-
-      return plainText;
+      return controllerQuill.document.toPlainText();
     } catch (e) {
-      // Handle error and return empty string or some default value
       return '';
     }
   }
@@ -92,73 +101,61 @@ class NoteController extends GetxController {
 
   Future<void> _loadNotes() async {
     try {
-      final loadedNotes = await _localStorageService.loadNotes();
-      // loadedNotes.forEach((noteLoaded) {
-      //  Note noteJson=noteLoaded;
-      //  Document content = noteJson.content
-      //  Note  noteConverted=Note(title: noteJson.title, content: )
-      //
-      // });
-      notes.assignAll(loadedNotes); // Update in-memory list
+      final loadedNotes = await _notesService.getNotes();
+      notes.assignAll(loadedNotes);
+      filteredNotes.assignAll(notes);
     } catch (e) {
       _showErrorSnackbar('Failed to load notes: $e');
     }
     update();
   }
 
-  Future<void> saveNote(Note note) async {
-    try {
-      print('Starting saveNote process');
+  Future<void> saveNote() async {
+    if (currentNote != null) {
+      currentNote!.title = titleController.text;
+      currentNote!.content =
+          jsonEncode(quillController.document.toDelta().toJson());
+      print('the title has been saved: ${currentNote!.title}');
 
-      // Saving the note to local storage
-      print('Saving note to local storage');
-      await _localStorageService.saveNote(note);
-
-      // Finding the index of the existing note in the list
-      print('Checking if note already exists in the list');
-      int index =
-          notes.indexWhere((existingNote) => existingNote.id == note.id);
-
-      if (index != -1) {
-        // If note exists, update the note in the list
-        print('Note exists, updating note at index $index');
-        notes[index] = note;
-      } else {
-        // If note does not exist, add it to the list
-        print('Note does not exist, adding new note to the list');
-        notes.add(note);
+      try {
+        await _notesService.addNote(currentNote!);
+        final index = notes.indexWhere((note) => note.id == currentNote!.id);
+        if (index != -1) {
+          notes[index] = currentNote!;
+        } else {
+          notes.add(currentNote!);
+        }
+        filteredNotes.assignAll(notes);
+      } catch (e) {
+        _showErrorSnackbar('Failed to save note: $e');
       }
-
-      // Trigger UI update
-      print('Updating UI');
+      await _loadNotes();
       update();
-
-      print('saveNote process completed successfully');
-    } catch (e) {
-      // Handle saving errors
-      print('Error occurred during saveNote process: $e');
-      _showErrorSnackbar('Failed to save note: $e');
     }
   }
 
-  Future<void> deleteNote(Note note) async {
-    try {
-      await _localStorageService.deleteNote(note.id!);
-      notes.removeWhere(
-          (element) => element.id == note.id); // Update in-memory list
-      update(); // Trigger UI update
-    } catch (e) {
-      _showErrorSnackbar('Failed to delete note: $e');
+  Future<void> deleteNote() async {
+    if (currentNote != null) {
+      try {
+        await _notesService.deleteNote(currentNote!.id!);
+        notes.removeWhere((note) => note.id == currentNote!.id);
+        filteredNotes.assignAll(notes);
+      } catch (e) {
+        _showErrorSnackbar('Failed to delete note: $e');
+      }
+      update();
     }
   }
 
-  void editNote(Note note) {
-    int index = notes.indexWhere((existingNote) => existingNote.id == note.id);
-    if (index != -1) {
-      notes[index] = note;
-      update(); // Trigger UI update
-    } else {
-      _showErrorSnackbar('Note not found for editing');
+  void editNote() {
+    if (currentNote != null) {
+      final index = notes.indexWhere((note) => note.id == currentNote!.id);
+      if (index != -1) {
+        notes[index] = currentNote!;
+        update();
+      } else {
+        _showErrorSnackbar('Note not found for editing');
+      }
     }
   }
 
@@ -167,11 +164,21 @@ class NoteController extends GetxController {
   }
 
   void toggleToolbar() {
-    print('this is toggle toolbar');
-
     isShowToolbar = !isShowToolbar;
     update();
   }
 
-// Additional methods for other note operations can be added here
+  void searchNotes(String query) {
+    if (query.isEmpty) {
+      filteredNotes.assignAll(notes);
+    } else {
+      filteredNotes.assignAll(
+        notes
+            .where((note) =>
+                note.title.contains(query) || note.content.contains(query))
+            .toList(),
+      );
+    }
+    update();
+  }
 }

@@ -3,14 +3,57 @@
 // routes/app_pages.dart
 
 import 'package:get/get.dart';
+import '../controllers/auth_controller.dart';
 import '../controllers/note_controller.dart';
+import '../view/auth/change_password.dart';
+import '../view/auth/forgot_password.dart';
+import '../view/auth/login.dart';
+import '../view/auth/register.dart';
 import '../view/note_edit_screen.dart';
 import '../view/note_list_screen.dart';
+import '../view/splash_screen.dart';
 import 'app_routes.dart';
 // Import other screens and their respective controllers
 
 class AppPages {
   static final pages = [
+    GetPage(
+      name: AppRoutes.splash,
+      page: () => SplashScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<AuthController>(() => AuthController());
+      }),
+    ),
+
+    GetPage(
+      name: AppRoutes.login,
+      page: () => LoginScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<AuthController>(() => AuthController());
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.register,
+      page: () => RegisterScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<AuthController>(() => AuthController());
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.forgotPassword,
+      page: () => ForgotPasswordScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<AuthController>(() => AuthController());
+      }),
+    ),
+    GetPage(
+      name: AppRoutes.changePassword,
+      page: () => ChangePasswordScreen(),
+      binding: BindingsBuilder(() {
+        Get.lazyPut<AuthController>(() => AuthController());
+      }),
+    ),
+
     GetPage(
       name: AppRoutes.noteList,
       page: () => NoteListScreen(),

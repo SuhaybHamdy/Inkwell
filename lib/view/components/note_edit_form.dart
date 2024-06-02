@@ -16,12 +16,12 @@ class NoteEditForm extends GetView<NoteController> {
     return Form(
       child: Column(
         children: [
-          SizedBox(
+          const SizedBox(
             height: 20,
           ),
           TextFormField(
             controller: controller.titleController,
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               labelText: 'Title',
               labelStyle: TextStyle(
                 color: Colors.grey, // Label color
@@ -31,7 +31,7 @@ class NoteEditForm extends GetView<NoteController> {
               border: InputBorder.none, // Remove border
               contentPadding: EdgeInsets.symmetric(vertical: 10.0), // Padding
             ),
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.grey, // Text color
               fontSize: 22.0, // Text font size
             ),
