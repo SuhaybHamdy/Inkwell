@@ -1,77 +1,75 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import 'package:get/get.dart';
-import 'package:flutter_quill/flutter_quill.dart' as md;
+import '../../controllers/add_or_edit_note_controller.dart';
+import '../../localization/local.dart';
+import '../widget/note_add_or_edit_widgets/build_editor_card.dart';
+import '../widget/note_add_or_edit_widgets/build_form.dart';
 
-import '../../controllers/note_controller.dart';
-import '../../models/note.dart';
-
-class NoteEditForm extends GetView<NoteController> {
+class NoteEditForm extends GetView<AddOrEditNoteController> {
   const NoteEditForm({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final NoteController controller = Get.find<NoteController>();
+    final AddOrEditNoteController controller =
+        Get.find<AddOrEditNoteController>();
+    return GetBuilder<AddOrEditNoteController>(
+      builder: (controller) {
+        return SingleChildScrollView(
+            child: Container(
+              // color: Colors.transparent,
+          child: Stack(
+            children: [
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 400),
+                child: controller.expanded.isFalse
+                    ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AppBar(
+                            title: Text(L10n.addTitle.tr),
+                            actions: [
+                              InkWell(
+                                onTap: () => controller.saveOrUpdateNote(),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      color: Get.theme.primaryColor,
+                                      borderRadius: BorderRadius.circular(5)),
+                                  padding: const EdgeInsets.all(8.0),
+                                  margin: const EdgeInsets.all(8.0),
+                                  child: Text(L10n.save.tr,
+                                      style: Get.textTheme.bodyMedium!.copyWith(
+                                          color:
+                                              Get.theme.colorScheme.onPrimary)),
+                                ),
+                              )
+                            ],
+                          ),
 
-    return Form(
-      child: Column(
-        children: [
-          const SizedBox(
-            height: 20,
-          ),
-          TextFormField(
-            controller: controller.titleController,
-            decoration: const InputDecoration(
-              labelText: 'Title',
-              labelStyle: TextStyle(
-                color: Colors.grey, // Label color
-                fontSize: 18.0, // Label font size
-                fontWeight: FontWeight.bold, // Label font weight
+                          const SizedBox(height: 210.0),
+                          NoteForm(),
+                          // ],
+                        ],
+                      )
+                    : Container(
+                        height: Get.height,
+                        width: Get.width,
+                      ),
               ),
-              border: InputBorder.none, // Remove border
-              contentPadding: EdgeInsets.symmetric(vertical: 10.0), // Padding
-            ),
-            style: const TextStyle(
-              color: Colors.grey, // Text color
-              fontSize: 22.0, // Text font size
-            ),
-          ),
+              Obx(() => AnimatedPositioned(
+                    duration: const Duration(milliseconds: 400),
+                    top: controller.expanded.isFalse ? 100 : 0,
+                    left: controller.expanded.isFalse ? 16 : 0,
+                    right: controller.expanded.isFalse ? 16 : 0,
+                    // bottom: controller.expanded.isFalse ? 0 : 0,
+                    height: controller.expanded.isFalse ? 200 : Get.height,
 
-          const SizedBox(height: 16.0),
-          // TextFormField(
-          //   controller: controller.contentController,
-          //   decoration: InputDecoration(labelText: 'Content'),
-          //   maxLines: 10,
-          // ),
-          Expanded(
-            // height: 60,
-            // width: Get.width,
-            child: md.QuillEditor.basic(
-              configurations: md.QuillEditorConfigurations(
-                controller: controller.quillController,
-              ),
-            ),
+                    child: buildEditorCard(controller),
+                  )),
+            ],
           ),
-
-          const SizedBox(height: 16.0),
-          // ElevatedButton(
-          //   onPressed: () {
-          //     print("this is the content of note : ${controller.quillController.document.toDelta().toJson()}");
-          //     final newNote = Note(
-          //       title: controller.titleController.text,
-          //       content: controller.quillController.document.toDelta().toJson().toString(),
-          //     );
-          //     if (controller.note == null) {
-          //       controller.saveNote(newNote);
-          //     } else {
-          //       controller.editNote(newNote);
-          //     }
-          //     // Get.back();
-          //   },
-          //   child: Text(controller.note == null ? 'Create' : 'Update'),
-          // ),
-        ],
-      ),
+        ));
+      },
     );
   }
 }

@@ -4,7 +4,7 @@ import 'package:inkwell/controllers/auth_controller.dart';
 import 'package:inkwell/view/auth/register.dart';
 import 'package:inkwell/view/auth/widget/loading_button.dart';
 
-import '../../local/local.dart';
+import '../../localization/local.dart';
 import 'forgot_password.dart';
 
 class LoginScreen extends StatelessWidget {

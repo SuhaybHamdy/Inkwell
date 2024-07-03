@@ -61,7 +61,8 @@ class MaterialTheme {
   }
 
   ThemeData light() {
-    return theme(lightScheme().toColorScheme());
+    return theme(lightScheme().toColorScheme(),
+    );
   }
 
   static MaterialScheme lightMediumContrastScheme() {
@@ -485,6 +486,7 @@ class MaterialScheme {
 
 extension MaterialSchemeUtils on MaterialScheme {
   ColorScheme toColorScheme() {
+
     return ColorScheme(
       brightness: brightness,
       primary: primary,

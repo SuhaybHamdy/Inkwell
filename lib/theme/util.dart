@@ -17,3 +17,20 @@ TextTheme createTextTheme(
   );
   return textTheme;
 }
+
+
+enum ViewMode {
+  list,
+  grid,
+  calendar,
+}
+
+enum CustomCalendarFormat {
+  cityView,
+
+  day,
+  // threeDays,
+  week,
+  month,
+}
+

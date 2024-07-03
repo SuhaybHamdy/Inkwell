@@ -46,6 +46,15 @@ dependencies:
   firebase_auth: ^4.19.6
   flutter_secure_storage: ^9.2.2
   google_fonts: ^6.2.1
+  intl: ^0.18.1
+  table_calendar: ^3.0.9
+  calendar_view: ^1.2.0
+  flutter_colorpicker: ^1.1.0
+  image_picker: ^1.1.2
+  google_generative_ai: ^0.4.3
+  marked:
+  quill_delta:
+  fluttertoast: ^8.2.6
 
 dev_dependencies:
   flutter_test:
@@ -70,9 +79,26 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
+  # Assets
+  assets:
+    - assets/image/ai/ai.png
+    - assets/image/notes_wallpeper/
+    - assets/image/expand-arrows.png
+    - assets/image/notebook-notepage-paper-background-2.jpeg
+    - assets/image/notes-background.jpeg
+    - assets/image/category/category_personal.png
+    - assets/image/category/category_work.png
+    - assets/image/category/category_shopping.png
+    - assets/image/category/category_ideas.png
+    - assets/image/category/category_travel.png
+    - assets/image/category/category_finance.png
+    - assets/image/category/category_health.png
+    - assets/image/category/category_food.png
+    - assets/image/category/category_learning.png
+    - assets/image/category/category_events.png
+
   #   - images/a_dot_ham.jpeg
+
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

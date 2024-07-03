@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:inkwell/models/user.dart';
 import 'package:inkwell/services/auth_service.dart';
@@ -52,7 +53,7 @@ class AuthController extends GetxController {
       isAuth.value = true;
       Get.offAllNamed(AppRoutes.noteList);
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      Get.snackbar('Error', e.toString(), backgroundColor:Colors.red );
     } finally {
       loading.value = false;
     }
@@ -61,7 +62,7 @@ class AuthController extends GetxController {
   // Register method with additional user details
   Future<void> register(String email, String password, String confirmPassword, String displayName) async {
     if (password != confirmPassword) {
-      Get.snackbar('Error', 'Passwords do not match');
+      Get.snackbar('Error', 'Passwords d, backgroundColor:Colors.red o not match');
       return;
     }
     try {
@@ -84,7 +85,7 @@ class AuthController extends GetxController {
       isAuth.value = true;
       Get.offAllNamed(AppRoutes.noteList);
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      Get.snackbar('Error', e.toString(), backgroundColor:Colors.red );
     } finally {
       loading.value = false;
     }
@@ -97,7 +98,7 @@ class AuthController extends GetxController {
       await _authService.sendPasswordResetEmail(email);
       Get.snackbar('Success', 'Password reset email sent');
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      Get.snackbar('Error', e.toString(), backgroundColor:Colors.red );
     } finally {
       loading.value = false;
     }
@@ -106,7 +107,7 @@ class AuthController extends GetxController {
   // Change password method
   Future<void> changePassword(String oldPassword, String newPassword, String confirmPassword) async {
     if (newPassword != confirmPassword) {
-      Get.snackbar('Error', 'Passwords do not match');
+      Get.snackbar('Error', 'Passwords do not match',backgroundColor:Colors.red);
       return;
     }
     try {
@@ -116,7 +117,7 @@ class AuthController extends GetxController {
       await _authService.updatePassword(user, newPassword);
       Get.snackbar('Success', 'Password updated');
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      Get.snackbar('Error', e.toString(), backgroundColor:Colors.red );
     } finally {
       loading.value = false;
     }
@@ -131,7 +132,7 @@ class AuthController extends GetxController {
       isAuth.value = false;
       Get.offAllNamed(AppRoutes.login);
     } catch (e) {
-      Get.snackbar('Error', 'Logout failed: $e');
+      Get.snackbar('Error', 'Logout fail, backgroundColor:Colors.red ed: $e');
     } finally {
       loading.value = false;
     }

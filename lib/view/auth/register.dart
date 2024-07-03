@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:inkwell/controllers/auth_controller.dart';
 import 'package:inkwell/view/auth/widget/loading_button.dart';
 
-import '../../local/local.dart';
+import '../../localization/local.dart';
 
 class RegisterScreen extends StatelessWidget {
   final AuthController authController = Get.find<AuthController>();

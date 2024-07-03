@@ -16,5 +16,8 @@ class AppRoutes {
   static const String noteList = '/notes';
   static const String noteDetail = '/noteDetail';
 
+    static const String settings = '/settings';
+
+
 // Add more route names here as needed
 }

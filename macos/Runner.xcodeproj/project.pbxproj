@@ -230,6 +230,11 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
+				KnownAssetTags = (
+					New,
+					"New-1",
+					"New-2",
+				);
 				LastSwiftUpdateCheck = 0920;
 				LastUpgradeCheck = 1510;
 				ORGANIZATIONNAME = "";
